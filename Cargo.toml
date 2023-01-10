@@ -3,7 +3,10 @@ name = "zeppelin_core"
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-description = "The Hindenburg of encryption tools."
+description = "A library that implements a stream cipher based on Balloon hashing"
+repository = "https://github.com/lostinentropy/zeppelin_core"
+readme = "README.md"
+keywords = ["crypto"]
 
 [dependencies]
 rand = "0.8"
