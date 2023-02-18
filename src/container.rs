@@ -53,7 +53,7 @@ pub fn create_container<R: Read + Seek, W: Write + Seek>(
         "metadata.json",
         file_options.compression_method(CompressionMethod::Deflated),
     )?;
-    // TODO: Remove this unwrap?
+    
     zip.write_all(serde_json::to_string(&metadata).unwrap().as_bytes())?;
 
     zip.start_file("data.dat", file_options)?;
