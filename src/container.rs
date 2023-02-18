@@ -183,6 +183,7 @@ mod tests {
         let success = read_container(&mut container, &mut res, "passwd", None).unwrap();
 
         assert!(success);
+        assert_eq!(source.into_inner(), res.into_inner());
     }
 
     #[test]
