@@ -24,18 +24,21 @@ pub struct CryptSettings {
 
 #[allow(dead_code)]
 impl CryptSettings {
-    /// Default settings with `s_cost` ~ 30 MB
-    pub fn default() -> Self {
-        Self {
-            s_cost: 468750,
-            t_cost: 2,
-            step_delta: 3,
-        }
-    }
     /// Less aggressiv settings used primarily for testing.
     pub fn default_for_testing() -> Self {
         Self {
             s_cost: 1000,
+            t_cost: 2,
+            step_delta: 3,
+        }
+    }
+}
+
+impl std::default::Default for CryptSettings {
+    /// Default settings with `s_cost` ~ 30 MB
+    fn default() -> Self {
+        Self {
+            s_cost: 468750,
             t_cost: 2,
             step_delta: 3,
         }
