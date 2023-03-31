@@ -76,7 +76,7 @@ impl Stream {
         }
     }
 
-    /// Applies stream cipher to `data`, dynamically updating internal hash cache.
+    /// Applies stream cipher to `data`, dynamically updating internal mask.
     /// Additionally performs "wrapped `XOR`" with result and salt, effectively
     /// encrypting the salt.
     fn apply_with_salt(&mut self, mut data: impl AsMut<[u8]>, salt: &mut [u8; 64], prog: Progress) {
@@ -92,7 +92,7 @@ impl Stream {
         }
     }
 
-    /// Applies stream cipher to `data`, dynamically updating internal hash cache.
+    /// Applies stream cipher to `data`, dynamically updating internal mask.
     /// Additionally reads in output to a provided hasher.
     fn apply_with_hash(&mut self, mut data: impl AsMut<[u8]>, hash: &mut Sha3_512, prog: Progress) {
         for byte in data.as_mut() {
