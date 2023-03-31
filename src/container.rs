@@ -1,4 +1,4 @@
-//! This module provides an easy to use API to apply the cypher to a reader/writer.
+//! This module provides an easy to use API to apply the cipher to a reader/writer.
 
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;

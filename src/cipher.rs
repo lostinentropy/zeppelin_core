@@ -45,7 +45,7 @@ impl std::default::Default for CryptSettings {
     }
 }
 
-/// Stream cypher like struct.
+/// Stream cipher like struct.
 /// Includes cache of stream.
 pub struct Stream {
     balloon: Balloon,
