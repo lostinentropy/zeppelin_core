@@ -17,7 +17,7 @@
 //! - can be used on anything that implements the `Read` and `Seek` traits
 //!
 //! ## Examples
-//! This example example shows how to use the high-level API based on the `Read` and `Write` traits.
+//! This example shows how to use the high-level API based on the `Read` and `Write` traits.
 //! ```
 //! # use std::io::{self, Cursor, Read, Seek, SeekFrom, Write};
 //! # use zeppelin_core::{container, progress::Progress, cipher::{self, CryptSettings}};
