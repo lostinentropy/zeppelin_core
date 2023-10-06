@@ -149,7 +149,7 @@ impl Stream {
 }
 
 /// Generate salt using entropy from OS.
-pub fn gen_salt() -> [u8; 64] {
+fn gen_salt() -> [u8; 64] {
     // uses getrandom which gets entropy from OS
     let mut rng = ChaCha20Rng::from_entropy();
     let mut res = [0_u8; 64];
