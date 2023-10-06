@@ -94,7 +94,7 @@ pub fn read_container<R: Read + Seek, W: Write>(
         inner
     } else {
         // This seems a little long
-        return Err(io::Error::new(io::ErrorKind::Other, "Invalid `metadata.json` found").into());
+        return Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid `metadata.json` found").into());
     };
     drop(metadata_file);
 
