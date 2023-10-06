@@ -157,6 +157,21 @@ fn gen_salt() -> [u8; 64] {
     res
 }
 
+fn derive_password(key: impl AsRef<[u8]>, salt: impl AsRef<[u8]>) -> argon2::Result<[u8; 64]> {
+    use argon2::{Algorithm, Argon2, Params, Version};
+
+    let mut output = [0u8; 64];
+    let params = Params::new(
+        Params::DEFAULT_M_COST,
+        Params::DEFAULT_T_COST * 10,
+        Params::DEFAULT_P_COST,
+        None,
+    )?;
+    let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
+    argon2.hash_password_into(key.as_ref(), salt.as_ref(), &mut output)?;
+    Ok(output)
+}
+
 /// Encrypts in a stream like fashion reading from `source` and writing to `dest`.
 /// Returns `salt` needed for decryption. Resulting message contains *MAC*.
 pub fn encrypt<R: Read + Seek, W: Write>(
@@ -166,6 +181,18 @@ pub fn encrypt<R: Read + Seek, W: Write>(
     settings: CryptSettings,
     prog: Progress,
 ) -> io::Result<[u8; 64]> {
+    // Derive key
+    prog.set_state("Deriving Password".to_string());
+    let mut salt = gen_salt();
+    let key = if let Ok(inner) = derive_password(key, salt) {
+        inner
+    } else {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Unable to derive password",
+        ));
+    };
+
     // Calculate MAC
     prog.set_state("Calculating MAC".to_string());
     let mut mac_hash = Sha3_512::new();
@@ -176,7 +203,6 @@ pub fn encrypt<R: Read + Seek, W: Write>(
     let mut mac = io::Cursor::new(mac);
 
     // Initialize Stream
-    let mut salt = gen_salt();
     let mut stream = Stream::new(&key, salt.to_vec(), settings, prog.clone());
 
     prog.set_state("Encrypting".to_string());
@@ -217,6 +243,16 @@ pub fn decrypt<R: Read, W: Write>(
     settings: CryptSettings,
     prog: Progress,
 ) -> io::Result<bool> {
+    prog.set_state("Deriving Password".to_string());
+    let key = if let Ok(inner) = derive_password(key, decrypted_salt) {
+        inner
+    } else {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Unable to derive password",
+        ));
+    };
+
     let mut expected_mac = [0_u8; 64];
 
     let mut stream = Stream::new(&key, decrypted_salt.to_vec(), settings, prog.clone());
