@@ -14,7 +14,7 @@ use std::io::{self, Read, Seek, Write};
 
 use serde::{Deserialize, Serialize};
 
-/// Struct to encapsulate all settings required for Balloon-Hashing.
+/// Struct to encapsulate all parameters required for Balloon-Hashing.
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct CryptSettings {
     pub s_cost: usize,
