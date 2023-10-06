@@ -7,9 +7,6 @@ use crate::progress::Progress;
 
 use sha3::{Digest, Sha3_512};
 
-use rand::prelude::*;
-use rand_chacha::ChaCha20Rng;
-
 use std::io::{self, Read, Seek, Write};
 
 use serde::{Deserialize, Serialize};
@@ -150,6 +147,9 @@ impl Stream {
 
 /// Generate salt using entropy from OS.
 fn gen_salt() -> [u8; 64] {
+    use rand::prelude::*;
+    use rand_chacha::ChaCha20Rng;
+
     // uses getrandom which gets entropy from OS
     let mut rng = ChaCha20Rng::from_entropy();
     let mut res = [0_u8; 64];
