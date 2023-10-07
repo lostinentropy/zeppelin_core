@@ -200,14 +200,14 @@ pub fn encrypt<R: Read + Seek, W: Write>(
     // Calculate MAC
     prog.set_state("Calculating MAC".to_string());
     let mut mac_hash = Sha3_512::new();
-    mac_hash.update(&key);
+    mac_hash.update(key);
     io::copy(source, &mut mac_hash)?;
     source.rewind()?;
     let mac: [u8; 64] = mac_hash.finalize().into();
     let mut mac = io::Cursor::new(mac);
 
     // Initialize Stream
-    let mut stream = Stream::new(&key, salt.to_vec(), settings, prog.clone());
+    let mut stream = Stream::new(key, salt.to_vec(), settings, prog.clone());
 
     prog.set_state("Encrypting".to_string());
 
@@ -252,7 +252,7 @@ pub fn decrypt<R: Read, W: Write>(
 
     let mut expected_mac = [0_u8; 64];
 
-    let mut stream = Stream::new(&key, decrypted_salt.to_vec(), settings, prog.clone());
+    let mut stream = Stream::new(key, decrypted_salt.to_vec(), settings, prog.clone());
 
     prog.set_state("Decrypting".to_string());
 
@@ -260,7 +260,7 @@ pub fn decrypt<R: Read, W: Write>(
     stream.apply_with_salt(&mut expected_mac, &mut [0_u8; 64], prog.clone());
 
     let mut mac_hash = Sha3_512::new();
-    mac_hash.update(&key);
+    mac_hash.update(key);
     stream.copy_and_apply_with_hash(source, dest, &mut mac_hash, prog)?;
 
     let mac: [u8; 64] = mac_hash.finalize().into();
