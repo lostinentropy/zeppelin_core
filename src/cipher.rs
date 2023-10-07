@@ -157,19 +157,30 @@ fn gen_salt() -> [u8; 64] {
     res
 }
 
-fn derive_password(key: impl AsRef<[u8]>, salt: impl AsRef<[u8]>) -> argon2::Result<[u8; 64]> {
-    use argon2::{Algorithm, Argon2, Params, Version};
+fn derive_password(key: impl AsRef<[u8]>, salt: impl AsRef<[u8]>) -> io::Result<[u8; 64]> {
+    #[inline]
+    fn inner(key: impl AsRef<[u8]>, salt: impl AsRef<[u8]>) -> argon2::Result<[u8; 64]> {
+        use argon2::{Algorithm, Argon2, Params, Version};
 
-    let mut output = [0u8; 64];
-    let params = Params::new(
-        Params::DEFAULT_M_COST,
-        Params::DEFAULT_T_COST * 10,
-        Params::DEFAULT_P_COST,
-        None,
-    )?;
-    let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
-    argon2.hash_password_into(key.as_ref(), salt.as_ref(), &mut output)?;
-    Ok(output)
+        let mut output = [0u8; 64];
+        let params = Params::new(
+            Params::DEFAULT_M_COST,
+            Params::DEFAULT_T_COST * 10,
+            Params::DEFAULT_P_COST,
+            None,
+        )?;
+        let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
+        argon2.hash_password_into(key.as_ref(), salt.as_ref(), &mut output)?;
+        Ok(output)
+    }
+
+    match inner(key, salt) {
+        Ok(inner) => Ok(inner),
+        Err(_) => Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Unable to derive password",
+        )),
+    }
 }
 
 /// Encrypts in a stream like fashion reading from `source` and writing to `dest`.
@@ -184,14 +195,7 @@ pub fn encrypt<R: Read + Seek, W: Write>(
     // Derive key
     prog.set_state("Deriving Password".to_string());
     let mut salt = gen_salt();
-    let key = if let Ok(inner) = derive_password(key, salt) {
-        inner
-    } else {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "Unable to derive password",
-        ));
-    };
+    let key = derive_password(key, salt)?;
 
     // Calculate MAC
     prog.set_state("Calculating MAC".to_string());
@@ -244,14 +248,7 @@ pub fn decrypt<R: Read, W: Write>(
     prog: Progress,
 ) -> io::Result<bool> {
     prog.set_state("Deriving Password".to_string());
-    let key = if let Ok(inner) = derive_password(key, decrypted_salt) {
-        inner
-    } else {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "Unable to derive password",
-        ));
-    };
+    let key = derive_password(key, decrypted_salt)?;
 
     let mut expected_mac = [0_u8; 64];
 
